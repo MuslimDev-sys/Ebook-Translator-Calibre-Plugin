@@ -229,6 +229,24 @@ class PageElement(Element):
         elements = []
         if self.reserve_pattern is not None:
             elements = element_copy.xpath(self.reserve_pattern, namespaces=ns)
+            
+        # Filter <a> tags: Only reserve empty, raw URL, or image-only <a> tags.
+        # Skip reservation for text-bearing <a> tags so they can be translated in-place.
+        filtered_elements = []
+        for element in elements:
+            if get_name(element) == 'a':
+                text = trim(''.join(element.itertext()))
+                is_empty = text == ''
+                is_url = text.startswith(('http://', 'https://', 'www.')) or \
+                         bool(re.match(r'^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}(/.*)?$', text))
+                has_img = len(element.xpath('.//x:img', namespaces=ns)) > 0
+                
+                if is_empty or is_url or has_img:
+                    filtered_elements.append(element)
+            else:
+                filtered_elements.append(element)
+        elements = filtered_elements
+
         for eid, element in enumerate(elements):
             replacement = self.placeholder[0].format(format(eid, '05'))
             if get_name(element) in ('sub', 'sup'):
@@ -709,7 +727,7 @@ class ElementHandler:
         # conflicts with the mechanism of merge translation.
         default_rules = (
             'img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd', 'abbr', 'wbr',
-            'var', 'canvas', 'svg', 'script', 'style', 'math')
+            'var', 'canvas', 'svg', 'script', 'style', 'math', 'a')
         self.reserve_pattern = create_xpath(default_rules + tuple(rules))
 
     def prepare_original(self, elements):
