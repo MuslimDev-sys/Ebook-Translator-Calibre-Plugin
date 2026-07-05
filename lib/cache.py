@@ -157,8 +157,12 @@ class TranslationCache:
     @classmethod
     def remove(cls, filename):
         file_path = os.path.join(cls.cache_path, filename)
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception:
+            # Safely bypass file-lock errors during manual cache cleaning
+            pass
 
     @classmethod
     def clean(cls):
@@ -284,8 +288,12 @@ class TranslationCache:
 
     def destroy(self):
         self.close()
-        if os.path.exists(self.file_path):
-            os.remove(self.file_path)
+        try:
+            if os.path.exists(self.file_path):
+                os.remove(self.file_path)
+        except Exception:
+            # Prevents WinError 32 on Windows if the file remains locked in memory
+            pass
 
     def done(self):
         if not self.persistence:
