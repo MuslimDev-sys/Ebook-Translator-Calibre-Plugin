@@ -302,6 +302,27 @@ class PageElement(Element):
                 xml_escape(pattern), lambda _: element, translation)
         translation = self._polish_translation(translation)
 
+        # Custom logic: Update single <a> tag links in place (e.g., Table of Contents & chapter headers)
+        if self.position == 'only':
+            a_tags = list(self.element.iterdescendants('{%s}a' % ns['x']))
+            a_tags_with_text = [a for a in a_tags if trim(''.join(a.itertext())) != '']
+            if len(a_tags_with_text) == 1:
+                a_tag = a_tags_with_text[0]
+                a_text = trim(''.join(a_tag.itertext()))
+                parent_text = trim(''.join(self.element.itertext()))
+                if a_text == parent_text:
+                    # Update text in deepest formatting container (strong, em, span, etc.) if one exists
+                    children = list(a_tag)
+                    if len(children) == 1 and get_name(children[0]) in ('strong', 'em', 'span', 'b', 'i'):
+                        children[0].text = translation
+                        children[0].tail = None
+                        a_tag.text = None
+                    else:
+                        for child in list(a_tag):
+                            a_tag.remove(child)
+                        a_tag.text = translation
+                    return
+
         element_name = get_name(self.element)
         new_element = self._create_new_element(element_name, translation)
 
