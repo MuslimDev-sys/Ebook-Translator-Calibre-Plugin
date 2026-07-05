@@ -688,7 +688,7 @@ class ElementHandler:
         # conflicts with the mechanism of merge translation.
         default_rules = (
             'img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd', 'abbr', 'wbr',
-            'var', 'canvas', 'svg', 'script', 'style', 'math', 'a')
+            'var', 'canvas', 'svg', 'script', 'style', 'math')
         self.reserve_pattern = create_xpath(default_rules + tuple(rules))
 
     def prepare_original(self, elements):
