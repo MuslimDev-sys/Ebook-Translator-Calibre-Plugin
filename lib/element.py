@@ -266,17 +266,25 @@ class PageElement(Element):
 
         # Apply typographical corrections if translation contains Arabic characters (U+0600 to U+06FF)
         if bool(re.search(r'[\u0600-\u06FF]', translation)):
-            # 1. Remove commas that immediately follow a <br> tag (e.g., after a line break)
-            translation = re.sub(r'(<br[^>]*>\s*)[،,]\s*', r'\1', translation)
+            # Print the raw string to the console to make invisible Unicode characters visible
+            log.debug('[EbookTranslator] Raw Arabic string before cleanup:', repr(translation))
             
-            # 2. Fix Arabic punctuation spacing: remove spaces before punctuation
-            translation = re.sub(r'\s+([،؛؟,;?])', r'\1', translation)
+            # Match spaces, Zero-Width Non-Joiner, RLM, LRM, PDF, and other invisible bi-directional characters
+            rtl_markers = r'[\s\u200c\u200d\u200e\u200f\u202a-\u202e\u2066-\u2069]'
+            
+            # 1. Remove commas that immediately follow a <br> tag (bypassing invisible RTL markers)
+            translation = re.sub(r'(<br[^>]*>' + rtl_markers + r'*)[،,]\s*', r'\1', translation)
+            
+            # 2. Fix Arabic punctuation spacing: remove spaces/markers before punctuation
+            translation = re.sub(rtl_markers + r'+([،؛؟,;?])', r'\1', translation)
             
             # 3. Ensure there is a single space after punctuation if followed by a letter
             translation = re.sub(r'([،؛؟,;?])(?=\w)', r'\1 ', translation)
             
             # 4. Remove any accidental leading commas at the very start of the paragraph
-            translation = re.sub(r'^\s*[،,]\s*', '', translation)
+            translation = re.sub(r'^' + rtl_markers + r'*[،,]\s*', '', translation)
+            
+            log.debug('[EbookTranslator] Raw Arabic string after cleanup:', repr(translation))
 
         return translation
 
