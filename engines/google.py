@@ -367,9 +367,8 @@ class GeminiTranslate(GenAI):
         # Recommend setting temperature to 0.5 for retaining the placeholder.
         if self.merge_enabled:
             prompt += (
-                ' Ensure that placeholders matching the pattern {{id_\\d+}} '
-                'in the content are retained.')
-        return prompt + ' Start translating: ' + text
+                ' Ensure that placeholders matching the pattern'
+                ' __id_\\d+__ in the content are retained.')
 
     def get_models(self):
         endpoint = f'{self.endpoint}?key={self.api_key}'
