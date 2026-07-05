@@ -356,16 +356,19 @@ class PageElement(Element):
                 a_text = trim(''.join(a_tag.itertext()))
                 parent_text = trim(''.join(self.element.itertext()))
                 if a_text == parent_text:
+                    # Strip any HTML tags (like empty placeholder anchors) from the text we insert in-place
+                    clean_translation = re.sub(r'<[^>]+>', '', translation).strip()
+                    
                     # Update text in deepest formatting container (strong, em, span, etc.) if one exists
                     children = list(a_tag)
                     if len(children) == 1 and get_name(children[0]) in ('strong', 'em', 'span', 'b', 'i'):
-                        children[0].text = translation.strip()
+                        children[0].text = clean_translation
                         children[0].tail = None
                         a_tag.text = None
                     else:
                         for child in list(a_tag):
                             a_tag.remove(child)
-                        a_tag.text = translation.strip()
+                        a_tag.text = clean_translation
                     return
 
         element_name = get_name(self.element)
