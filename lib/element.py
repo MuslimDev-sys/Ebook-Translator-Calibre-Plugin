@@ -262,7 +262,24 @@ class PageElement(Element):
     def _polish_translation(self, translation):
         translation = translation.replace('\n', '<br/>')
         # Condense consecutive letters to a maximum of four.
-        return re.sub(r'((\w)\2{3})\2*', r'\1', translation)
+        translation = re.sub(r'((\w)\2{3})\2*', r'\1', translation)
+
+        # Apply typographical corrections if translating to Arabic
+        target_lang = getattr(self, 'translation_lang', '')
+        if target_lang == 'ar':
+            # 1. Remove commas that immediately follow a placeholder (e.g., after a line break)
+            translation = re.sub(r'(__\s*id\s*_\s*\d+\s*__\s*)[،,]\s*', r'\1', translation)
+            
+            # 2. Fix Arabic punctuation spacing: remove spaces before punctuation
+            translation = re.sub(r'\s+([،؛؟,;?])', r'\1', translation)
+            
+            # 3. Ensure there is a single space after punctuation if followed by a letter
+            translation = re.sub(r'([،؛؟,;?])(?=\w)', r'\1 ', translation)
+            
+            # 4. Remove any accidental leading commas at the very start of the paragraph
+            translation = re.sub(r'^\s*[،,]\s*', '', translation)
+
+        return translation
 
     def _create_new_element(
             self, name, content='', copy_attrs=True, excluding_attrs=[]):
