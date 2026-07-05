@@ -267,8 +267,8 @@ class PageElement(Element):
         # Apply typographical corrections if translating to Arabic
         target_lang = getattr(self, 'translation_lang', '')
         if target_lang == 'ar':
-            # 1. Remove commas that immediately follow a placeholder (e.g., after a line break)
-            translation = re.sub(r'(__\s*id\s*_\s*\d+\s*__\s*)[،,]\s*', r'\1', translation)
+            # 1. Remove commas that immediately follow a <br> tag (e.g., after a line break)
+            translation = re.sub(r'(<br[^>]*>\s*)[،,]\s*', r'\1', translation)
             
             # 2. Fix Arabic punctuation spacing: remove spaces before punctuation
             translation = re.sub(r'\s+([،؛؟,;?])', r'\1', translation)
