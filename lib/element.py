@@ -264,9 +264,8 @@ class PageElement(Element):
         # Condense consecutive letters to a maximum of four.
         translation = re.sub(r'((\w)\2{3})\2*', r'\1', translation)
 
-        # Apply typographical corrections if translating to Arabic
-        target_lang = getattr(self, 'translation_lang', '')
-        if target_lang == 'ar':
+        # Apply typographical corrections if translation contains Arabic characters (U+0600 to U+06FF)
+        if bool(re.search(r'[\u0600-\u06FF]', translation)):
             # 1. Remove commas that immediately follow a <br> tag (e.g., after a line break)
             translation = re.sub(r'(<br[^>]*>\s*)[،,]\s*', r'\1', translation)
             
