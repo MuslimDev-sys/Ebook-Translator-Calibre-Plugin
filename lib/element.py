@@ -332,13 +332,13 @@ class PageElement(Element):
                     # Update text in deepest formatting container (strong, em, span, etc.) if one exists
                     children = list(a_tag)
                     if len(children) == 1 and get_name(children[0]) in ('strong', 'em', 'span', 'b', 'i'):
-                        children[0].text = translation
+                        children[0].text = translation.strip()
                         children[0].tail = None
                         a_tag.text = None
                     else:
                         for child in list(a_tag):
                             a_tag.remove(child)
-                        a_tag.text = translation
+                        a_tag.text = translation.strip()
                     return
 
         element_name = get_name(self.element)
