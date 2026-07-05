@@ -33,7 +33,7 @@ class Base:
     api_key_errors = ['401']
     separator = '\n\n'
     support_html = False
-    placeholder = ('{{{{id_{}}}}}', r'({{\s*)+id\s*_\s*{}\s*(\s*}})+')
+    placeholder = ('__id_{}__', r'__\s*id\s*_\s*{}\s*__')
     using_tip = None
 
     concurrency_limit: int = 0
