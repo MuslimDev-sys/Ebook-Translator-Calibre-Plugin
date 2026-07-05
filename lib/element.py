@@ -266,14 +266,13 @@ class PageElement(Element):
 
         # Apply typographical corrections if translation contains Arabic characters (U+0600 to U+06FF)
         if bool(re.search(r'[\u0600-\u06FF]', translation)):
-            # Print the raw string to the console to make invisible Unicode characters visible
             log.debug('[EbookTranslator] Raw Arabic string before cleanup:', repr(translation))
             
             # Match spaces, Zero-Width Non-Joiner, RLM, LRM, PDF, and other invisible bi-directional characters
             rtl_markers = r'[\s\u200c\u200d\u200e\u200f\u202a-\u202e\u2066-\u2069]'
             
-            # 1. Remove commas that immediately follow a <br> tag (bypassing invisible RTL markers)
-            translation = re.sub(r'(<br[^>]*>' + rtl_markers + r'*)[،,]\s*', r'\1', translation)
+            # 1. Remove commas that immediately follow a <br> tag (bypassing </br> closing tags and invisible markers)
+            translation = re.sub(r'(<br[^>]*>(?:</br>)?' + rtl_markers + r'*)[،,]\s*', r'\1', translation)
             
             # 2. Fix Arabic punctuation spacing: remove spaces/markers before punctuation
             translation = re.sub(rtl_markers + r'+([،؛؟,;?])', r'\1', translation)
