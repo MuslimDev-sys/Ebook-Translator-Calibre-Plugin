@@ -269,19 +269,23 @@ class PageElement(Element):
             log.debug('[EbookTranslator] Raw Arabic string before cleanup:', repr(translation))
             
             # Match spaces, Zero-Width Non-Joiner, RLM, LRM, PDF, and other invisible bi-directional characters
-            rtl_markers = r'[\s\u200c\u200d\u200e\u200f\u202a-\u202e\u2066-\u2069]'
+            # Declared as a standard string (no 'r') so Python compiles the \u characters correctly
+            rtl_markers = '[\s\u200c\u200d\u200e\u200f\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069]'
             
             # 1. Remove commas that immediately follow a <br> tag (bypassing </br> closing tags and invisible markers)
-            translation = re.sub(r'(<br[^>]*>(?:</br>)?' + rtl_markers + r'*)[،,]\s*', r'\1', translation)
+            pattern1 = '(<br[^>]*>(?:</br>)?' + rtl_markers + '*)[،,]\\s*'
+            translation = re.sub(pattern1, r'\1', translation)
             
             # 2. Fix Arabic punctuation spacing: remove spaces/markers before punctuation
-            translation = re.sub(rtl_markers + r'+([،؛؟,;?])', r'\1', translation)
+            pattern2 = rtl_markers + '+([،؛؟,;?])'
+            translation = re.sub(pattern2, r'\1', translation)
             
             # 3. Ensure there is a single space after punctuation if followed by a letter
-            translation = re.sub(r'([،؛؟,;?])(?=\w)', r'\1 ', translation)
+            translation = re.sub('([،؛؟,;?])(?=\\w)', r'\1 ', translation)
             
             # 4. Remove any accidental leading commas at the very start of the paragraph
-            translation = re.sub(r'^' + rtl_markers + r'*[،,]\s*', '', translation)
+            pattern4 = '^' + rtl_markers + '*[،,]\\s*'
+            translation = re.sub(pattern4, '', translation)
             
             log.debug('[EbookTranslator] Raw Arabic string after cleanup:', repr(translation))
 
