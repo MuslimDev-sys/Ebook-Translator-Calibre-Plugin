@@ -207,7 +207,10 @@ class PageElement(Element):
         return json.dumps(attributes) if attributes else None
 
     def _safe_remove(self, element, replacement=''):
-        previous, parent = element.getprevious(), element.getparent()
+        parent = element.getparent()
+        if parent is None:
+            return  # Prevents a crash if a parent tag was already removed
+        previous = element.getprevious()
         if previous is not None:
             previous.tail = (previous.tail or '') + replacement
             previous.tail += (element.tail or '')
@@ -685,7 +688,7 @@ class ElementHandler:
         # conflicts with the mechanism of merge translation.
         default_rules = (
             'img', 'code', 'br', 'hr', 'sub', 'sup', 'kbd', 'abbr', 'wbr',
-            'var', 'canvas', 'svg', 'script', 'style', 'math')
+            'var', 'canvas', 'svg', 'script', 'style', 'math', 'a')
         self.reserve_pattern = create_xpath(default_rules + tuple(rules))
 
     def prepare_original(self, elements):
